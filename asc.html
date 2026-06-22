@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HR Boshqaruv</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#111;--bg2:#1c1c1e;--bg3:#2c2c2e;--border:#3a3a3c;--text:#fff;--text2:#8e8e93;--primary:#ea580c;--green:#30d158;--red:#ff453a;--orange:#ff9f0a;--blue:#0a84ff;--r:14px}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;min-height:100vh;overflow-x:hidden;font-size:16px}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(28,28,30,.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:100;padding:8px 0 calc(8px + env(safe-area-inset-bottom))}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;background:none;border:none;color:var(--text2);font-size:10px;font-weight:500;padding:4px 2px;transition:color .2s}
+.nb.active{color:var(--primary)}
+.nb svg{width:24px;height:24px;stroke-width:1.7}
+.page{display:none;padding:0 0 90px;min-height:100vh}
+.page.active{display:block}
+.topbar{padding:16px 16px 8px;display:flex;align-items:flex-start;justify-content:space-between}
+.topbar-title{font-size:28px;font-weight:700;letter-spacing:-.5px}
+.topbar-sub{font-size:14px;color:var(--text2);margin-top:2px}
+.topbar-btn{width:34px;height:34px;border-radius:50%;background:var(--bg3);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);margin-top:4px}
+.topbar-btn svg{width:16px;height:16px}
+.card{background:var(--bg2);border-radius:var(--r);padding:16px;margin:0 16px 12px}
+.section-label{font-size:13px;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;padding:0 16px;margin-bottom:8px}
+.company-banner{padding:16px 16px 0}
+.cb-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cb-name{font-size:26px;font-weight:800;letter-spacing:-.5px}
+.sub-card{background:var(--bg2);border-radius:var(--r);padding:14px 16px;margin:0 16px 10px;display:flex;align-items:center;justify-content:space-between}
+.sc-left{display:flex;align-items:center;gap:12px}
+.sc-avatar{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;flex-shrink:0}
+.sc-name{font-size:15px;font-weight:600}
+.sc-badges{display:flex;gap:5px;margin-top:4px;flex-wrap:wrap}
+.badge{font-size:11px;padding:2px 9px;border-radius:20px;font-weight:600}
+.b-blue{background:#0a84ff22;color:#0a84ff}
+.b-green{background:#30d15822;color:#30d158}
+.b-orange{background:#ff9f0a22;color:#ff9f0a}
+.b-red{background:#ff453a22;color:#ff453a}
+.exp-banner{background:#0a2d4d;border-radius:var(--r);padding:13px 16px;margin:0 16px 12px;display:flex;align-items:center;justify-content:space-between}
+.exp-left{display:flex;align-items:center;gap:8px}
+.exp-icon{width:28px;height:28px;border-radius:8px;background:#0a84ff22;display:flex;align-items:center;justify-content:center}
+.exp-text{font-size:13px;color:#6eb8f7}
+.mon-card{background:var(--bg2);border-radius:var(--r);padding:16px;margin:0 16px 12px}
+.mon-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.mon-title{display:flex;align-items:center;gap:7px;font-size:15px;font-weight:600}
+.dot-live{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.stat{text-align:center;padding:4px 0}
+.stat-n{font-size:26px;font-weight:800;line-height:1}
+.stat-l{font-size:10px;color:var(--text2);margin-top:3px;text-transform:uppercase;letter-spacing:.3px}
+.att-row{display:flex;align-items:center;justify-content:space-between}
+.att-bar-wrap{flex:1;height:4px;background:var(--bg3);border-radius:2px;margin:0 10px}
+.att-bar{height:4px;border-radius:2px;transition:width .5s}
+.att-pct{font-size:13px;font-weight:600}
+.emp-card{background:var(--bg2);border-radius:var(--r);padding:14px 16px;margin:0 16px 8px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.ec-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#fff;flex-shrink:0}
+.ec-info{flex:1;min-width:0}
+.ec-name{font-size:15px;font-weight:600}
+.ec-pos{font-size:13px;color:var(--text2);margin-top:2px}
+.st-badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px}
+.st-present{background:#30d15820;color:#30d158}
+.st-late{background:#ff9f0a20;color:#ff9f0a}
+.st-absent{background:#3a3a3c;color:var(--text2)}
+.st-ketdi{background:#0a84ff22;color:#0a84ff}
+.empty{text-align:center;padding:60px 20px}
+.empty-emoji{font-size:48px;margin-bottom:16px}
+.empty-t{font-size:17px;font-weight:600;margin-bottom:8px}
+.empty-s{font-size:14px;color:var(--text2);margin-bottom:24px}
+.search-wrap{padding:8px 16px 12px}
+.search-box{background:var(--bg3);border-radius:12px;display:flex;align-items:center;padding:0 12px;gap:8px}
+.search-box svg{width:16px;height:16px;color:var(--text2);flex-shrink:0}
+.search-box input{background:none;border:none;outline:none;color:var(--text);font-size:15px;padding:11px 0;width:100%;font-family:inherit}
+.search-box input::placeholder{color:var(--text2)}
+.btn{border:none;cursor:pointer;border-radius:12px;font-size:16px;font-weight:600;font-family:inherit;transition:all .15s;padding:14px;width:100%}
+.btn:active{transform:scale(.97);opacity:.9}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-secondary{background:var(--bg3);color:var(--text)}
+.btn-outline{background:transparent;color:var(--primary);border:1.5px dashed var(--primary)}
+.btn-danger{background:#ff453a22;color:#ff453a}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:none;align-items:flex-end;backdrop-filter:blur(4px)}
+.overlay.open{display:flex}
+.sheet{background:var(--bg2);border-radius:20px 20px 0 0;padding:12px 16px calc(24px + env(safe-area-inset-bottom));width:100%;max-height:88vh;overflow-y:auto;animation:su .25s ease}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.s-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+.s-title{font-size:20px;font-weight:700;margin-bottom:20px}
+.steps-bar{display:flex;gap:4px;margin-bottom:20px}
+.sb{flex:1;height:3px;border-radius:2px;background:var(--border);transition:background .3s}
+.sb.on{background:var(--primary)}
+.fg{margin-bottom:16px}
+.fl{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;display:block}
+.fi{width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:12px;padding:13px 14px;color:var(--text);font-size:15px;outline:none;font-family:inherit;transition:border-color .2s}
+.fi:focus{border-color:var(--primary)}
+.ferr{color:var(--red);font-size:12px;margin-top:5px}
+.opt-item{background:var(--bg3);border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border:1.5px solid transparent;margin-bottom:8px;transition:all .2s}
+.opt-item.sel{border-color:var(--primary);background:rgba(234,88,12,.07)}
+.opt-name{font-size:14px;font-weight:500}
+.opt-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.check-ic{color:var(--primary);display:none}
+.opt-item.sel .check-ic{display:block}
+.stabs{display:flex;background:var(--bg3);border-radius:10px;padding:3px;margin-bottom:14px}
+.stab{flex:1;padding:9px;border-radius:8px;border:none;background:none;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.stab.on{background:var(--bg2);color:var(--text)}
+.sa{display:flex;gap:10px;margin-top:16px}
+.sa .btn{flex:1}
+.success-icon{width:68px;height:68px;background:#30d15820;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px}
+.info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.info-row:last-child{border-bottom:none}
+.ir-l{font-size:14px;color:var(--text2)}
+.ir-r{font-size:14px;font-weight:500}
+.invite-box{background:var(--bg3);border-radius:10px;padding:12px;font-size:12px;color:var(--text2);word-break:break-all;line-height:1.5;margin-bottom:10px;border:1px solid var(--border)}
+.branch-card{background:var(--bg2);border-radius:var(--r);padding:14px 16px;margin:0 16px 8px;display:flex;align-items:center;justify-content:space-between}
+.bc-name{font-size:15px;font-weight:600}
+.bc-addr{font-size:13px;color:var(--text2);margin-top:2px}
+.bc-del{background:none;border:none;cursor:pointer;color:var(--red);font-size:20px;padding:4px}
+.rep-opt{background:var(--bg3);border-radius:var(--r);padding:14px 16px;margin:0 16px 8px;display:flex;align-items:center;gap:14px;cursor:pointer;border:2px solid transparent;transition:border-color .2s}
+.rep-opt.sel{border-color:var(--primary)}
+.rep-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--bg2)}
+.rep-l{font-size:15px;font-weight:600}
+.rep-s{font-size:12px;color:var(--text2);margin-top:2px}
+.range-card{background:var(--bg3);border-radius:var(--r);padding:16px;margin:0 16px 12px}
+.range-dates{font-size:22px;font-weight:700}
+.range-sub{font-size:13px;color:var(--text2);margin-top:4px}
+.sett-card{background:var(--bg2);border-radius:var(--r);padding:16px;margin:0 16px 12px}
+.sett-avatar{width:76px;height:76px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:#fff;margin:0 auto 8px}
+.sett-name{font-size:17px;font-weight:700;text-align:center}
+.sett-sub{font-size:13px;color:var(--text2);text-align:center}
+.color-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.cswatch{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s}
+.cswatch.sel{border-color:#fff;transform:scale(1.1)}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--bg2);color:var(--text);padding:10px 20px;border-radius:20px;font-size:14px;z-index:9999;border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap;display:none;pointer-events:none}
+.toast.show{display:block;animation:tf 2.5s forwards}
+@keyframes tf{0%{opacity:0;top:8px}10%{opacity:1;top:16px}75%{opacity:1}100%{opacity:0}}
+.br-filter{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none}
+.br-filter::-webkit-scrollbar{display:none}
+.br-chip{flex-shrink:0;padding:7px 16px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:var(--bg3);color:var(--text2);font-family:inherit;transition:all .2s}
+.br-chip.on{background:var(--primary);color:#fff}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<nav class="bnav">
+  <button class="nb active" onclick="gp('home')" id="nb-home">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Kompaniya
+  </button>
+  <button class="nb" onclick="gp('emps')" id="nb-emps">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+    Xodimlar
+  </button>
+  <button class="nb" onclick="gp('branches')" id="nb-branches">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    Filiallar
+  </button>
+  <button class="nb" onclick="gp('reports')" id="nb-reports">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Hisobotlar
+  </button>
+  <button class="nb" onclick="gp('settings')" id="nb-settings">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06-.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    Sozlamalar
+  </button>
+</nav>
+
+<div id="pg-home" class="page active"><div id="home-body"></div></div>
+
+<div id="pg-emps" class="page">
+  <div class="topbar">
+    <div><div class="topbar-title">Xodimlar</div><div id="emp-count" class="topbar-sub"></div></div>
+    <button class="topbar-btn" onclick="openAddEmp()">
+      <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+  </div>
+  <div class="search-wrap"><div class="search-box">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="emp-search" type="text" placeholder="Ism, lavozim qidirish..." oninput="filterEmps(this.value)">
+  </div></div>
+  <div id="br-filter-row" class="br-filter"></div>
+  <div id="emp-list"></div>
+</div>
+
+<div id="pg-branches" class="page">
+  <div class="topbar">
+    <div><div class="topbar-title">Filiallar</div><div id="br-count" class="topbar-sub"></div></div>
+    <button class="topbar-btn" onclick="openAddBranch()">
+      <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+  </div>
+  <div id="br-list"></div>
+</div>
+
+<div id="pg-reports" class="page">
+  <div class="topbar"><div class="topbar-title">Hisobotlar</div></div>
+  <div id="rep-body">
+    <div style="padding:0 16px 10px"><div class="section-label" style="padding:0;margin-bottom:12px">1 · HISOBOT TURINI TANLANG</div></div>
+    <div class="rep-opt sel" id="ro-today" onclick="selRep('today')"><div class="rep-icon">📅</div><div><div class="rep-l">Bugun</div><div class="rep-s">Bugungi kun</div></div></div>
+    <div class="rep-opt" id="ro-week" onclick="selRep('week')"><div class="rep-icon">🕐</div><div><div class="rep-l">So'nggi 7 kun</div><div class="rep-s">Oxirgi 7 kun</div></div></div>
+    <div class="rep-opt" id="ro-month" onclick="selRep('month')"><div class="rep-icon">📊</div><div><div class="rep-l">Joriy oy</div><div class="rep-s">Joriy oy</div></div></div>
+    <div style="padding:8px 16px 0"><button class="btn btn-primary" onclick="nextRepStep()">Keyingi →</button></div>
+  </div>
+  <div id="rep-step2" style="display:none">
+    <div class="topbar"><div class="topbar-title" style="font-size:20px">2 · Sana oralig'i</div></div>
+    <div class="range-card"><div class="range-dates" id="rng-text"></div><div class="range-sub" id="rng-sub"></div></div>
+    <div style="padding:0 16px;display:flex;gap:10px">
+      <button class="btn btn-secondary" style="flex:1" onclick="prevRepStep()">← Orqaga</button>
+      <button class="btn btn-primary" style="flex:1" onclick="genReport()">📊 Hisobot yaratish</button>
+    </div>
+  </div>
+</div>
+
+<div id="pg-settings" class="page">
+  <div class="topbar"><div class="topbar-title">Sozlamalar</div></div>
+  <div id="sett-body"></div>
+</div>
+
+<!-- SHEET: Add Employee -->
+<div class="overlay" id="sh-emp">
+  <div class="sheet">
+    <div class="s-handle"></div>
+    <div class="s-title">Yangi xodim</div>
+    <div class="steps-bar"><div class="sb on" id="esb1"></div><div class="sb" id="esb2"></div><div class="sb" id="esb3"></div><div class="sb" id="esb4"></div></div>
+    <div id="es1">
+      <div class="fg"><label class="fl">F.I.SH.</label><input class="fi" id="en-name" placeholder="To'liq ism familiya" type="text"><div class="ferr" id="en-err"></div></div>
+      <button class="btn btn-primary" onclick="en1()">Keyingi →</button>
+    </div>
+    <div id="es2" style="display:none">
+      <div class="section-label" style="padding:0;margin-bottom:10px">LAVOZIM TANLANG</div>
+      <div id="pos-opts"></div>
+      <button class="btn btn-outline" style="margin-bottom:12px" onclick="openAddPos()">+ Yangi lavozim</button>
+      <div class="sa"><button class="btn btn-secondary" onclick="eback(2)">← Orqaga</button><button class="btn btn-primary" onclick="en2()">Keyingi →</button></div>
+    </div>
+    <div id="es3" style="display:none">
+      <div class="section-label" style="padding:0;margin-bottom:10px">ISH GRAFIGI</div>
+      <div id="sch-opts"></div>
+      <button class="btn btn-outline" style="margin-bottom:12px" onclick="openAddSch()">+ Yangi jadval</button>
+      <div class="sa"><button class="btn btn-secondary" onclick="eback(3)">← Orqaga</button><button class="btn btn-primary" onclick="en3()">Keyingi →</button></div>
+    </div>
+    <div id="es4" style="display:none">
+      <div class="stabs"><button class="stab on" id="st-mon" onclick="setSalType('monthly')">Belgilangan oylik</button><button class="stab" id="st-hr" onclick="setSalType('hourly')">Soatlik</button></div>
+      <div class="fg"><label class="fl" id="sal-lbl">OYLIK MAOSH (SO'M)</label><input class="fi" id="en-sal" placeholder="0" type="number" inputmode="numeric"></div>
+      <div class="sa"><button class="btn btn-secondary" onclick="eback(4)">← Orqaga</button><button class="btn btn-primary" onclick="saveEmp()">✓ Saqlash</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- SHEET: Employee Detail -->
+<div class="overlay" id="sh-empd"><div class="sheet"><div class="s-handle"></div><div id="empd-body"></div></div></div>
+
+<!-- SHEET: Add Branch -->
+<div class="overlay" id="sh-br">
+  <div class="sheet">
+    <div class="s-handle"></div><div class="s-title">Yangi filial</div>
+    <div class="fg"><label class="fl">FILIAL NOMI</label><input class="fi" id="br-name" placeholder="Filial nomi"></div>
+    <div class="fg"><label class="fl">MANZIL (ixtiyoriy)</label><input class="fi" id="br-addr" placeholder="Shahar, ko'cha"></div>
+    <div class="sa"><button class="btn btn-secondary" onclick="cls('sh-br')">Bekor</button><button class="btn btn-primary" onclick="saveBranch()">Saqlash</button></div>
+  </div>
+</div>
+
+<!-- SHEET: Add Position -->
+<div class="overlay" id="sh-pos">
+  <div class="sheet">
+    <div class="s-handle"></div><div class="s-title">Yangi lavozim</div>
+    <div class="fg"><label class="fl">LAVOZIM NOMI</label><input class="fi" id="pos-name" placeholder="Masalan: Menejer"></div>
+    <div class="sa"><button class="btn btn-secondary" onclick="cls('sh-pos')">Bekor</button><button class="btn btn-primary" onclick="savePos()">Saqlash</button></div>
+  </div>
+</div>
+
+<!-- SHEET: Add Schedule -->
+<div class="overlay" id="sh-sch">
+  <div class="sheet">
+    <div class="s-handle"></div><div class="s-title">Yangi jadval</div>
+    <div class="fg"><label class="fl">JADVAL NOMI</label><input class="fi" id="sch-n" placeholder="9:00 - 18:00"></div>
+    <div style="display:flex;gap:10px">
+      <div class="fg" style="flex:1"><label class="fl">ISH BOSHLANISHI</label><input class="fi" id="sch-s" type="time" value="09:00"></div>
+      <div class="fg" style="flex:1"><label class="fl">ISH TUGASHI</label><input class="fi" id="sch-e" type="time" value="18:00"></div>
+    </div>
+    <div class="fg"><label class="fl">KECHIKISH CHEGARASI (DAQIQA)</label><input class="fi" id="sch-late" type="number" value="15"></div>
+    <div class="sa"><button class="btn btn-secondary" onclick="cls('sh-sch')">Bekor</button><button class="btn btn-primary" onclick="saveSch()">Saqlash</button></div>
+  </div>
+</div>
+
+<!-- SHEET: Success -->
+<div class="overlay" id="sh-ok">
+  <div class="sheet">
+    <div class="s-handle"></div>
+    <div style="text-align:center;margin-bottom:20px"><div class="success-icon">✅</div><div style="font-size:22px;font-weight:700">Xodim qo'shildi</div></div>
+    <div class="card" style="margin:0 0 14px"><div id="ok-info"></div></div>
+    <div class="fg">
+      <label class="fl">TAKLIF HAVOLASI</label>
+      <div class="invite-box" id="ok-link"></div>
+      <button class="btn btn-secondary" onclick="cpLink()" style="margin-top:6px">📋 Havolani nusxalash</button>
+    </div>
+    <div class="sa">
+      <button class="btn btn-secondary" onclick="addMore()">+ Yana qo'shish</button>
+      <button class="btn btn-primary" onclick="cls('sh-ok');renderEmps()">Tasdiqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHEET: Invite Links -->
+<div class="overlay" id="sh-links">
+  <div class="sheet">
+    <div class="s-handle"></div>
+    <div class="s-title">Barcha taklif havolalari</div>
+    <div id="links-body"></div>
+    <button class="btn btn-primary" onclick="cls('sh-links')">Yopish</button>
+  </div>
+</div>
+
+<script>
+// ============================
+// SEED DEFAULT DATA
+// ============================
+(function seed(){
+  if(localStorage.getItem('hr_seeded2')) return;
+  function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36)+Math.random().toString(36).slice(2)}
+  localStorage.setItem('hr_company', JSON.stringify({id:'c1',name:'HR Boshqaruv',color:'#ea580c',logo:'',maxEmp:25,maxBr:5,subDays:30}));
+  localStorage.setItem('hr_branches', JSON.stringify([
+    {id:'br-parus', name:'Parus filiali', addr:'Parus, Toshkent'},
+    {id:'br-nukus', name:'Nukus filiali', addr:'Nukus shahri'}
+  ]));
+  localStorage.setItem('hr_schedules', JSON.stringify([
+    {id:'sc1',name:'7:30 - 16:30',start:'07:30',end:'16:30',late:15},
+    {id:'sc2',name:'8:00 - 20:00',start:'08:00',end:'20:00',late:15},
+    {id:'sc3',name:'9:00 - 21:00',start:'09:00',end:'21:00',late:15},
+    {id:'sc4',name:'14:00 - 00:00',start:'14:00',end:'00:00',late:15},
+    {id:'sc5',name:'16:00 - 00:00',start:'16:00',end:'00:00',late:15},
+    {id:'sc6',name:'10:00 - 22:00',start:'10:00',end:'22:00',late:15},
+    {id:'sc7',name:'7:30-13:30 / 17:00-23:00',start:'07:30',end:'23:00',late:15},
+    {id:'sc8',name:'13:00 - 22:00',start:'13:00',end:'22:00',late:15},
+    {id:'sc9',name:'7:30 - 13:30',start:'07:30',end:'13:30',late:15}
+  ]));
+  localStorage.setItem('hr_positions', JSON.stringify([
+    {id:'p1',name:'Xodim'},{id:'p2',name:'Stajor'},{id:'p3',name:'Menejer'}
+  ]));
+  const emps=[
+    {id:uid(),name:'Muhammad Amin',posId:'p1',schId:'sc1',brId:'br-parus',salType:'monthly',salary:0,token:uid(),tgId:null,active:true,created:Date.now()},
+    {id:uid(),name:'Ibrohim',posId:'p1',schId:'sc2',brId:'br-parus',salType:'monthly',salary:0,token:uid(),tgId:null,active:true,created:Date.now()},
+    {id:uid(),name:'Kamola',posId:'p1',schId:'sc5',brId:'br-parus',salType:'monthly',salary:0,token:uid(),tgId:null,active:true,created:Date.now()},
+    {id:uid(),name:'Zoxida',posId:'p1',schId:'sc5',brId:'br-parus',salType:'monthly',salary:0,token:uid(),tgId:null,active:true,created:Date.now()},
+    {id:uid(),name:'Ilxom',posId:'p1',schId:'sc4',brId:'br-parus',salType:'monthly',salary:0,token:uid(),tgId:null,active:true,created:Date.now()},
+    {id:uid(),name:'Xurshid Soyibjonov',posId:'p1',schId:'sc5',brId:'br-nukus',salType:'monthly',salary:0,token:uid(),tgId:null,active:true,created:Date.now()},
+    {id:uid(),name:'Dadaxon Yulchiyev',posId:'p1',schId:'sc5',brId:'br-nukus',salType:'monthly',salary:0,token:uid(),tgId:null,active:true,created:Date.now()},
+    {id:uid(),name:'Mohichehra',posId:'p1',schId:'sc1',brId:'br-nukus',salType:'monthly',salary:0,token:uid(),tgId:null,active:true,created:Date.now()},
+    {id:uid(),name:'Aliakbar',posId:'p1',schId:'sc9',brId:'br-nukus',salType:'monthly',salary:0,token:uid(),tgId:null,active:true,created:Date.now()},
+    {id:uid(),name:'Aziza',posId:'p1',schId:'sc1',brId:'br-nukus',salType:'monthly',salary:0,token:uid(),tgId:null,active:true,created:Date.now()},
+    {id:uid(),name:'Abrorbek',posId:'p1',schId:'sc8',brId:'br-nukus',salType:'monthly',salary:0,token:uid(),tgId:null,active:true,created:Date.now()},
+    {id:uid(),name:'Maryam',posId:'p1',schId:'sc7',brId:'br-nukus',salType:'monthly',salary:0,token:uid(),tgId:null,active:true,created:Date.now()}
+  ];
+  localStorage.setItem('hr_emps', JSON.stringify(emps));
+  localStorage.setItem('hr_seeded2','1');
+})();
+
+// ============================
+// STORAGE HELPERS
+// ============================
+const BOT_UN = 'ottimoxm_bot';
+const COLORS = ['#7c3aed','#0891b2','#059669','#dc2626','#d97706','#2563eb','#db2777','#0f766e'];
+function load(k,d){try{return JSON.parse(localStorage.getItem('hr_'+k))||d}catch{return d}}
+function save(k,v){localStorage.setItem('hr_'+k,JSON.stringify(v))}
+function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36)+Math.random().toString(36).slice(2)}
+function strc(s){let h=0;for(let c of s)h=(h*31+c.charCodeAt(0))%COLORS.length;return COLORS[h]}
+function registerPin(emp){
+  const pos=positions.find(p=>p.id===emp.posId);
+  fetch('/api/pins',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pin:emp.pin,empId:emp.id,name:emp.name,position:pos?.name||''})
+  }).catch(()=>{});
+}
+
+let co=load('company',{id:'c1',name:'HR Boshqaruv',color:'#ea580c',maxEmp:25,maxBr:5,subDays:30});
+let emps=load('emps',[]);
+let positions=load('positions',[]);
+let schedules=load('schedules',[]);
+let branches=load('branches',[]);
+let attendance=load('attendance',[]);
+
+function saveAll(){save('company',co);save('emps',emps);save('positions',positions);save('schedules',schedules);save('branches',branches);save('attendance',attendance)}
+
+// ============================
+// TOAST
+// ============================
+function toast(m,e='✅'){const t=document.getElementById('toast');t.textContent=e+' '+m;t.className='toast show';setTimeout(()=>t.className='toast',2600)}
+
+// ============================
+// PAGES
+// ============================
+function gp(n){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pg-'+n).classList.add('active');
+  document.getElementById('nb-'+n).classList.add('active');
+  if(n==='home')renderHome();
+  if(n==='emps')renderEmps();
+  if(n==='branches')renderBranches();
+  if(n==='settings')renderSettings();
+  if(n==='reports'){document.getElementById('rep-body').style.display='block';document.getElementById('rep-step2').style.display='none';}
+}
+
+// ============================
+// HOME
+// ============================
+function renderHome(){
+  const today=new Date().toISOString().split('T')[0];
+  const todayAtt=attendance.filter(a=>a.date===today);
+  const present=todayAtt.filter(a=>a.status==='present').length;
+  const late=todayAtt.filter(a=>a.status==='late').length;
+  const total=emps.filter(e=>e.active).length;
+  const absent=Math.max(0,total-present-late);
+  const vacation=todayAtt.filter(a=>a.status==='vacation').length;
+  const rate=total?Math.round((present+late)/total*100):0;
+  const now=new Date().toLocaleTimeString('uz-UZ',{hour:'2-digit',minute:'2-digit'});
+  const daysLeft=co.subDays||30;
+  const subEnd=new Date();subEnd.setDate(subEnd.getDate()+daysLeft);
+  const expDate=subEnd.toLocaleDateString('uz-UZ');
+  const init=(co.name||'H')[0].toUpperCase();
+  const rateColor=rate>70?'var(--green)':rate>40?'var(--orange)':'var(--red)';
+
+  document.getElementById('home-body').innerHTML=`
+    <div class="company-banner">
+      <div class="cb-top">
+        <div><div class="cb-name">${co.name}</div><div style="font-size:14px;color:var(--text2);margin-top:2px">Boshqaruv paneli</div></div>
+        <button onclick="gp('settings')" style="background:none;border:none;cursor:pointer;color:var(--text2);padding:4px">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06-.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="sub-card">
+      <div class="sc-left">
+        <div class="sc-avatar" style="background:${co.color}">${init}</div>
+        <div>
+          <div class="sc-name">${co.name}</div>
+          <div class="sc-badges">
+            <span class="badge b-blue">Obuna</span>
+            <span class="badge ${daysLeft>7?'b-blue':'b-orange'}">${daysLeft} kun qoldi</span>
+            <span class="badge ${daysLeft>0?'b-green':'b-red'}">${daysLeft>0?'Faol':'Tugagan'}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="exp-banner">
+      <div class="exp-left">
+        <div class="exp-icon"><svg width="14" height="14" fill="none" stroke="#0a84ff" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        <div class="exp-text">Tugaydi: ${expDate}</div>
+      </div>
+      <svg width="16" height="16" fill="none" stroke="#6eb8f7" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="mon-card">
+      <div class="mon-top">
+        <div class="mon-title"><div class="dot-live"></div>Monitoring</div>
+        <div style="font-size:13px;color:var(--text2)">${now}</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-n" style="color:var(--green)">${present}</div><div class="stat-l">Keldi</div></div>
+        <div class="stat"><div class="stat-n" style="color:var(--orange)">${late}</div><div class="stat-l">Kechikdi</div></div>
+        <div class="stat"><div class="stat-n" style="color:var(--red)">${absent}</div><div class="stat-l">Kelmadi</div></div>
+        <div class="stat"><div class="stat-n" style="color:var(--blue)">${vacation}</div><div class="stat-l">Ta'tilda</div></div>
+      </div>
+      <div class="att-row">
+        <span style="font-size:13px;color:var(--text2)">Davomat</span>
+        <div class="att-bar-wrap"><div class="att-bar" style="width:${rate}%;background:${rateColor}"></div></div>
+        <span class="att-pct" style="color:${rateColor}">${rate}%</span>
+      </div>
+    </div>
+    ${branches.map(br=>{
+      const brEmps=emps.filter(e=>e.active&&e.brId===br.id);
+      if(!brEmps.length)return'';
+      return`<div class="section-label">${br.name.toUpperCase()}</div>
+      ${brEmps.map(e=>{
+        const a=attendance.find(x=>x.empId===e.id&&x.date===today);
+        const st=a?a.status:'absent';
+        const stL={present:'Keldi',late:'Kechikdi',absent:'Kelmadi',vacation:"Ta'tilda",ketdi:'Ketdi'}[st]||'Kelmadi';
+        const stC={present:'st-present',late:'st-late',absent:'st-absent',vacation:'st-absent',ketdi:'st-ketdi'}[st]||'st-absent';
+        const pos=positions.find(p=>p.id===e.posId);
+        return`<div class="emp-card" onclick="gp('emps')">
+          <div class="ec-avatar" style="background:${strc(e.name)}">${e.name[0]}</div>
+          <div class="ec-info"><div class="ec-name">${e.name}</div><div class="ec-pos">${pos?.name||'—'}</div></div>
+          <span class="st-badge ${stC}">${stL}</span>
+        </div>`;
+      }).join('')}`;
+    }).join('')}
+    <div style="padding:0 16px 8px">
+      <button class="btn btn-secondary" onclick="showAllLinks()" style="margin-top:4px">🔗 Barcha invite havolalari</button>
+    </div>
+  `;
+}
+
+// ============================
+// INVITE LINKS
+// ============================
+function showAllLinks(){
+  const el=document.getElementById('links-body');
+  const byBr={};
+  emps.filter(e=>e.active).forEach(e=>{
+    if(!byBr[e.brId])byBr[e.brId]=[];
+    byBr[e.brId].push(e);
+  });
+  let html='';
+  Object.entries(byBr).forEach(([brId,list])=>{
+    const br=branches.find(b=>b.id===brId);
+    html+=`<div class="section-label" style="padding:0;margin:12px 0 8px">📍 ${br?.name||'Boshqa'}</div>`;
+    list.forEach(e=>{
+      const link=`https://t.me/${BOT_UN}?start=invite_${e.token}`;
+      html+=`<div style="background:var(--bg3);border-radius:12px;padding:12px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div class="ec-avatar" style="background:${strc(e.name)};width:36px;height:36px;font-size:14px">${e.name[0]}</div>
+          <div><div style="font-size:14px;font-weight:600">${e.name}</div><div style="font-size:12px;color:var(--text2)">${e.tgId?'✅ Ulangan':'⏳ Kutilmoqda'}</div></div>
+        </div>
+        <div style="font-size:11px;color:var(--text2);word-break:break-all;background:var(--bg2);padding:8px;border-radius:8px;margin-bottom:6px">${link}</div>
+        <button class="btn btn-secondary" style="padding:8px;font-size:13px" onclick="navigator.clipboard?.writeText('${link}');toast('${e.name} havolasi nusxalandi')">📋 Nusxalash</button>
+      </div>`;
+    });
+  });
+  el.innerHTML=html;
+  open('sh-links');
+}
+
+// ============================
+// EMPLOYEES
+// ============================
+let activeBrFilter='all';
+
+function renderEmps(){
+  const active=emps.filter(e=>e.active);
+  document.getElementById('emp-count').textContent=`${active.length} / ${co.maxEmp||25} xodim`;
+  // Branch filter chips
+  const fr=document.getElementById('br-filter-row');
+  fr.innerHTML=`<button class="br-chip ${activeBrFilter==='all'?'on':''}" onclick="setBrFilter('all')">Hammasi (${active.length})</button>`
+    +branches.map(b=>{const n=active.filter(e=>e.brId===b.id).length;return`<button class="br-chip ${activeBrFilter===b.id?'on':''}" onclick="setBrFilter('${b.id}')">${b.name} (${n})</button>`;}).join('')
+    +`<button class="br-chip ${activeBrFilter==='none'?'on':''}" onclick="setBrFilter('none')">Boshqa (${active.filter(e=>!e.brId).length})</button>`;
+  document.getElementById('emp-search').value='';
+  renderEmpList(active);
+}
+
+function setBrFilter(id){activeBrFilter=id;renderEmps()}
+
+function renderEmpList(list){
+  if(activeBrFilter&&activeBrFilter!=='all'){
+    list=list.filter(e=>activeBrFilter==='none'?!e.brId:e.brId===activeBrFilter);
+  }
+  const el=document.getElementById('emp-list');
+  if(!list.length){
+    el.innerHTML=`<div class="empty"><div class="empty-emoji">👥</div><div class="empty-t">Hali xodim yo'q</div><div class="empty-s">Birinchi xodimni qo'shing</div><button class="btn btn-primary" style="max-width:220px;margin:0 auto" onclick="openAddEmp()">+ Yangi xodim</button></div>`;
+    return;
+  }
+  el.innerHTML=list.map(e=>{
+    const pos=positions.find(p=>p.id===e.posId);
+    const sch=schedules.find(s=>s.id===e.schId);
+    const br=branches.find(b=>b.id===e.brId);
+    return`<div class="emp-card" onclick="openEmpDetail('${e.id}')">
+      <div class="ec-avatar" style="background:${strc(e.name)}">${e.name[0]}</div>
+      <div class="ec-info"><div class="ec-name">${e.name}</div><div class="ec-pos">${pos?.name||'—'} · ${br?.name||'—'}</div></div>
+      <svg width="16" height="16" fill="none" stroke="var(--text2)" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>`;
+  }).join('');
+}
+
+function filterEmps(q){
+  const list=emps.filter(e=>e.active&&(e.name.toLowerCase().includes(q.toLowerCase())||(positions.find(p=>p.id===e.posId)?.name||'').toLowerCase().includes(q.toLowerCase())));
+  renderEmpList(list);
+}
+
+function openEmpDetail(id){
+  const e=emps.find(x=>x.id===id);if(!e)return;
+  const pos=positions.find(p=>p.id===e.posId);
+  const sch=schedules.find(s=>s.id===e.schId);
+  const br=branches.find(b=>b.id===e.brId);
+  const link=`https://t.me/${BOT_UN}?start=invite_${e.token}`;
+  document.getElementById('empd-body').innerHTML=`
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+      <div class="ec-avatar" style="background:${strc(e.name)};width:56px;height:56px;font-size:22px">${e.name[0]}</div>
+      <div><div style="font-size:20px;font-weight:700">${e.name}</div><div style="font-size:14px;color:var(--text2);margin-top:2px">${pos?.name||'—'}</div></div>
+    </div>
+    <div class="card" style="margin:0 0 14px">
+      <div class="info-row"><span class="ir-l">Filial</span><span class="ir-r">${br?.name||'—'}</span></div>
+      <div class="info-row"><span class="ir-l">Jadval</span><span class="ir-r">${sch?.name||'—'}</span></div>
+      <div class="info-row"><span class="ir-l">Maosh</span><span class="ir-r">${(e.salary||0).toLocaleString()} so'm</span></div>
+      <div class="info-row" style="border:none"><span class="ir-l">Telegram</span><span class="ir-r">${e.tgId?'✅ Ulangan':'⏳ Kutilmoqda'}</span></div>
+    </div>
+    <div class="fg">
+      <label class="fl">TAKLIF HAVOLASI</label>
+      <div class="invite-box" id="det-link">${link}</div>
+      <button class="btn btn-secondary" onclick="navigator.clipboard?.writeText('${link}');toast('Nusxalandi')" style="margin-top:6px">📋 Nusxalash</button>
+    </div>
+    <div class="sa" style="margin-top:8px">
+      <button class="btn btn-danger" onclick="delEmp('${e.id}')">O'chirish</button>
+      <button class="btn btn-secondary" onclick="cls('sh-empd')">Yopish</button>
+    </div>`;
+  open('sh-empd');
+}
+
+function delEmp(id){
+  if(!confirm("Xodimni o'chirishni tasdiqlaysizmi?"))return;
+  emps=emps.map(e=>e.id===id?{...e,active:false}:e);
+  saveAll();cls('sh-empd');renderEmps();toast("Xodim o'chirildi",'🗑️');
+}
+
+// ============================
+// ADD EMP FLOW
+// ============================
+let ef={name:'',posId:null,schId:null,salType:'monthly',sal:0};
+
+function openAddEmp(){
+  ef={name:'',posId:null,schId:null,salType:'monthly',sal:0};
+  showEstep(1);
+  document.getElementById('en-name').value='';
+  document.getElementById('en-sal').value='';
+  document.getElementById('en-err').textContent='';
+  renderPosOpts();renderSchOpts();
+  open('sh-emp');
+}
+
+function showEstep(n){
+  for(let i=1;i<=4;i++){document.getElementById('es'+i).style.display=i===n?'block':'none';document.getElementById('esb'+i).classList.toggle('on',i<=n);}
+}
+function eback(f){showEstep(f-1)}
+function en1(){const v=document.getElementById('en-name').value.trim();if(v.length<2){document.getElementById('en-err').textContent='Kamida 2 ta harf kiriting';return;}document.getElementById('en-err').textContent='';ef.name=v;showEstep(2);}
+function en2(){showEstep(3)}
+function en3(){showEstep(4)}
+
+function renderPosOpts(){
+  document.getElementById('pos-opts').innerHTML=positions.length
+    ?positions.map(p=>`<div class="opt-item${ef.posId===p.id?' sel':''}" onclick="selPos('${p.id}')"><div><div class="opt-name">${p.name}</div></div><svg class="check-ic" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>`).join('')
+    :'<div style="text-align:center;color:var(--text2);padding:20px;font-size:14px">Hali lavozim yo\'q.</div>';
+}
+function selPos(id){ef.posId=ef.posId===id?null:id;renderPosOpts()}
+
+function renderSchOpts(){
+  document.getElementById('sch-opts').innerHTML=schedules.length
+    ?schedules.map(s=>`<div class="opt-item${ef.schId===s.id?' sel':''}" onclick="selSch('${s.id}')"><div><div class="opt-name">${s.name}</div><div class="opt-sub">${s.start} – ${s.end}</div></div><svg class="check-ic" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>`).join('')
+    :'<div style="text-align:center;color:var(--text2);padding:20px;font-size:14px">Hali jadval yo\'q.</div>';
+}
+function selSch(id){ef.schId=ef.schId===id?null:id;renderSchOpts()}
+
+function setSalType(t){ef.salType=t;document.getElementById('st-mon').classList.toggle('on',t==='monthly');document.getElementById('st-hr').classList.toggle('on',t==='hourly');document.getElementById('sal-lbl').textContent=t==='monthly'?"OYLIK MAOSH (SO'M)":"SOATLIK TARIF (SO'M)";}
+
+function saveEmp(){
+  const sal=parseFloat(document.getElementById('en-sal').value)||0;
+  const token=uid();
+  const emp={id:uid(),name:ef.name,posId:ef.posId,schId:ef.schId,brId:null,salType:ef.salType,salary:sal,token,tgId:null,active:true,created:Date.now()};
+  emps.push(emp);saveAll();cls('sh-emp');
+  const pos=positions.find(p=>p.id===emp.posId);
+  const sch=schedules.find(s=>s.id===emp.schId);
+  const link=`https://t.me/${BOT_UN}?start=invite_${token}`;
+  document.getElementById('ok-info').innerHTML=`<div class="info-row"><span class="ir-l">F.I.Sh.</span><span class="ir-r">${emp.name}</span></div><div class="info-row"><span class="ir-l">Lavozim</span><span class="ir-r">${pos?.name||'—'}</span></div><div class="info-row" style="border:none"><span class="ir-l">Jadval</span><span class="ir-r">${sch?.name||'—'}</span></div>`;
+  document.getElementById('ok-link').textContent=link;
+  document.getElementById('ok-link').setAttribute('data-link',link);
+  open('sh-ok');
+}
+
+function cpLink(){const l=document.getElementById('ok-link').getAttribute('data-link');navigator.clipboard?.writeText(l);toast('Havola nusxalandi')}
+function addMore(){cls('sh-ok');setTimeout(openAddEmp,200)}
+
+// ============================
+// POSITION
+// ============================
+function openAddPos(){document.getElementById('pos-name').value='';open('sh-pos')}
+function savePos(){const n=document.getElementById('pos-name').value.trim();if(!n){toast('Lavozim nomini kiriting','⚠️');return;}positions.push({id:uid(),name:n});saveAll();cls('sh-pos');renderPosOpts();toast('Lavozim qo\'shildi')}
+
+// ============================
+// SCHEDULE
+// ============================
+function openAddSch(){document.getElementById('sch-n').value='';document.getElementById('sch-s').value='09:00';document.getElementById('sch-e').value='18:00';document.getElementById('sch-late').value='15';open('sh-sch')}
+function saveSch(){const n=document.getElementById('sch-n').value.trim();if(n.length<2){toast('Jadval nomini kiriting','⚠️');return;}schedules.push({id:uid(),name:n,start:document.getElementById('sch-s').value,end:document.getElementById('sch-e').value,late:parseInt(document.getElementById('sch-late').value)||15});saveAll();cls('sh-sch');renderSchOpts();toast('Jadval qo\'shildi')}
+
+// ============================
+// BRANCHES
+// ============================
+function renderBranches(){
+  document.getElementById('br-count').textContent=`${branches.length} / ${co.maxBr||5} filial`;
+  const el=document.getElementById('br-list');
+  if(!branches.length){el.innerHTML=`<div class="empty"><div class="empty-emoji">📍</div><div class="empty-t">Hali filial yo'q</div><div class="empty-s">Birinchi filialni qo'shing</div><button class="btn btn-primary" style="max-width:220px;margin:0 auto" onclick="openAddBranch()">+ Yangi filial</button></div>`;return;}
+  el.innerHTML=branches.map(b=>{
+    const cnt=emps.filter(e=>e.active&&e.brId===b.id).length;
+    return`<div class="branch-card">
+      <div><div class="bc-name">📍 ${b.name}</div>${b.addr?`<div class="bc-addr">${b.addr}</div>`:''}
+      <div style="font-size:12px;color:var(--text2);margin-top:4px">${cnt} xodim</div></div>
+      <button class="bc-del" onclick="delBranch('${b.id}')">🗑</button>
+    </div>`;
+  }).join('');
+}
+
+function openAddBranch(){document.getElementById('br-name').value='';document.getElementById('br-addr').value='';open('sh-br')}
+function saveBranch(){
+  const n=document.getElementById('br-name').value.trim();
+  if(!n){toast('Filial nomini kiriting','⚠️');return;}
+  if(branches.length>=(co.maxBr||5)){toast(`Limit: max ${co.maxBr||5} filial`,'❌');return;}
+  branches.push({id:uid(),name:n,addr:document.getElementById('br-addr').value.trim()});
+  saveAll();cls('sh-br');renderBranches();toast('Filial qo\'shildi');
+}
+function delBranch(id){if(!confirm("Filialni o'chirishni tasdiqlaysizmi?"))return;branches=branches.filter(b=>b.id!==id);saveAll();renderBranches();toast("O'chirildi",'🗑️')}
+
+// ============================
+// REPORTS
+// ============================
+let repType='today';
+function selRep(t){repType=t;['today','week','month'].forEach(x=>document.getElementById('ro-'+x).classList.toggle('sel',x===t))}
+function nextRepStep(){
+  const td=new Date(),from=new Date(td),to=new Date(td);
+  if(repType==='week')from.setDate(td.getDate()-6);
+  else if(repType==='month')from.setDate(1);
+  const fmt=d=>d.toISOString().split('T')[0];
+  document.getElementById('rng-text').textContent=`${fmt(from)} → ${fmt(to)}`;
+  const days=Math.round((to-from)/86400000)+1;
+  document.getElementById('rng-sub').textContent=`${days} kun · ${{today:'Bugun',week:'Hafta',month:'Joriy oy'}[repType]}`;
+  document.getElementById('rep-body').style.display='none';
+  document.getElementById('rep-step2').style.display='block';
+}
+function prevRepStep(){document.getElementById('rep-body').style.display='block';document.getElementById('rep-step2').style.display='none'}
+function genReport(){
+  const td=new Date(),from=new Date(td),to=new Date(td);
+  if(repType==='week')from.setDate(td.getDate()-6);
+  else if(repType==='month')from.setDate(1);
+  const fmt=d=>d.toISOString().split('T')[0];
+  const fmtD=fmt(from),fmtT=fmt(to);
+  const filtered=attendance.filter(a=>a.date>=fmtD&&a.date<=fmtT);
+  if(!filtered.length){toast("Bu davr uchun ma'lumot yo'q",'ℹ️');return;}
+  let csv='Sana,Filial,Xodim,Lavozim,Holat,Kelish,Ketish\n';
+  filtered.forEach(a=>{
+    const e=emps.find(x=>x.id===a.empId);
+    const p=positions.find(x=>x.id===e?.posId);
+    const br=branches.find(x=>x.id===e?.brId);
+    const cin=a.checkIn?new Date(a.checkIn).toLocaleTimeString('uz-UZ',{hour:'2-digit',minute:'2-digit'}):'—';
+    const cout=a.checkOut?new Date(a.checkOut).toLocaleTimeString('uz-UZ',{hour:'2-digit',minute:'2-digit'}):'—';
+    const st={present:'Keldi',late:'Kechikdi',absent:'Kelmadi',vacation:"Ta'tilda"}[a.status]||a.status;
+    csv+=`${a.date},${br?.name||''},${e?.name||''},${p?.name||''},${st},${cin},${cout}\n`;
+  });
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`hisobot_${fmtD}_${fmtT}.csv`;a.click();
+  toast('Hisobot yuklab olindi');
+}
+
+// ============================
+// SETTINGS
+// ============================
+const SWATCHES=['#ea580c','#7c3aed','#0891b2','#059669','#dc2626','#2563eb','#db2777','#d97706','#0f766e','#be185d'];
+let selColor=null;
+
+function renderSettings(){
+  selColor=co.color;
+  const init=(co.name||'H')[0].toUpperCase();
+  document.getElementById('sett-body').innerHTML=`
+    <div class="sett-card">
+      <div class="sett-avatar" style="background:${co.color}" id="set-av">${init}</div>
+      <div class="sett-name" id="set-nm">${co.name}</div>
+      <div class="sett-sub">Brending ko'rinishi</div>
+    </div>
+    <div class="card">
+      <div class="fg"><label class="fl">KOMPANIYA NOMI</label><input class="fi" id="set-name" value="${co.name}" placeholder="Kompaniya nomi" oninput="document.getElementById('set-nm').textContent=this.value||'?';document.getElementById('set-av').textContent=(this.value||'?')[0].toUpperCase()"></div>
+      <div class="fg"><label class="fl">ASOSIY RANG</label><div class="color-row" id="col-row">${SWATCHES.map(c=>`<div class="cswatch${c===co.color?' sel':''}" style="background:${c}" onclick="pickColor('${c}')"></div>`).join('')}</div></div>
+      <button class="btn btn-primary" onclick="saveSett()">💾 Saqlash</button>
+    </div>
+    <div class="card" style="margin-top:0">
+      <div style="font-size:14px;color:var(--text2);margin-bottom:12px">Tarif ma'lumotlari</div>
+      <div class="info-row"><span class="ir-l">Xodimlar limiti</span><span class="ir-r">${co.maxEmp||25} ta</span></div>
+      <div class="info-row"><span class="ir-l">Filiallar limiti</span><span class="ir-r">${co.maxBr||5} ta</span></div>
+      <div class="info-row" style="border:none"><span class="ir-l">Obuna</span><span class="ir-r" style="color:var(--green)">Faol ✅</span></div>
+    </div>`;
+}
+
+function pickColor(c){selColor=c;document.querySelectorAll('.cswatch').forEach(s=>s.classList.toggle('sel',s.style.background===c));document.getElementById('set-av').style.background=c}
+function saveSett(){const n=document.getElementById('set-name').value.trim();if(!n)return;co.name=n;co.color=selColor||co.color;saveAll();toast('Sozlamalar saqlandi');renderSettings();renderHome()}
+
+// ============================
+// SHEET HELPERS
+// ============================
+function open(id){document.getElementById(id).classList.add('open')}
+function cls(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
+
+// ============================
+// BOT DAVOMAT SYNC
+// ======================
+async function fetchBotAttendance(){
+  try{
+    const today=new Date().toISOString().split('T')[0];
+    const r=await fetch('/api/attendance?date='+today);
+    if(!r.ok)return;
+    const data=await r.json();
+    if(!data.ok||!data.records?.length)return;
+    let changed=false;
+    data.records.forEach(rec=>{
+      const st=rec.status==='keldi'?'present':rec.status==='ketdi'?'ketdi':'present';
+      const emp=emps.find(e=>e.active&&(
+        String(e.tgId)===String(rec.userId)||
+        e.name.toLowerCase().includes((rec.name||'').toLowerCase().split(' ')[0])
+      ));
+      const empId=emp?emp.id:'bot_'+rec.userId;
+      const exists=attendance.find(a=>a.empId===empId&&a.date===today);
+      if(!exists){
+        attendance.push({id:'bot_'+rec.userId+'_'+today,empId,date:today,status:st,time:rec.time,name:rec.name,userId:rec.userId});
+        changed=true;
+      } else if(exists.status!==st){
+        exists.status=st;exists.time=rec.time;
+        changed=true;
+      }
+    });
+    if(changed){saveAll();renderHome();}
+  }catch(e){console.log('Bot sync xato:',e.message);}
+}
+
+// INIT
+const tg=window.Telegram?.WebApp;
+if(tg){tg.ready();tg.expand();}
+// Sync all employee PINs to backend on startup
+(function syncAllPins(){
+  const emps=load('employees',[]);
+  emps.forEach(emp=>{if(emp.pin&&emp.active!==false)registerPin(emp);});
+})();
+renderHome();
+fetchBotAttendance();
+setInterval(fetchBotAttendance,30000);
+</script>
+</body>
+</html>
